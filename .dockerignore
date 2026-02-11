@@ -1,0 +1,9 @@
+target/
+.mvn/
+*.db
+*.log
+.git/
+.idea/
+*.iml
+build/
+!Dockerfile
