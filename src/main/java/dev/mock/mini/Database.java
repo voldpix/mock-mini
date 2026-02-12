@@ -2,6 +2,9 @@ package dev.mock.mini;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import dev.mock.mini.common.exception.MockMiniException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -11,6 +14,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Database {
 
     private static HikariDataSource dataSource;
@@ -35,8 +39,7 @@ public class Database {
         try (var conn = getConnection()) {
             initSchema(conn);
         } catch (SQLException e) {
-            log.error("Failed to initialize database", e);
-            throw new RuntimeException(e);
+            throw new MockMiniException("Failed to initialize database", e);
         }
         log.info("Database initialized successfully.");
     }
@@ -55,8 +58,7 @@ public class Database {
             }
             log.info("Database schema initialized from schema.sql");
         } catch (Exception e) {
-            log.error("Failed to load schema.sql", e);
-            throw new RuntimeException("Could not initialize database schema", e);
+            throw new MockMiniException("Could not initialize database schema", e);
         }
     }
 
@@ -75,12 +77,12 @@ public class Database {
     private static String loadResource() {
         var path = "schema.sql";
         try (var is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
-            if (is == null) {
-                throw new RuntimeException("Resource not found: " + path);
+            if (Objects.isNull(is)) {
+                throw new MockMiniException("Resource not found: " + path);
             }
             return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to read resource: " + path, e);
+            throw new MockMiniException("Failed to read resource: " + path, e);
         }
     }
 }

@@ -1,7 +1,6 @@
 package dev.mock.mini;
 
 import com.google.gson.GsonBuilder;
-import dev.mock.mini.common.dto.IdResponse;
 import dev.mock.mini.common.dto.MockRuleDto;
 import dev.mock.mini.common.exception.BadRequestException;
 import dev.mock.mini.repository.MockRuleRepository;

@@ -1,12 +1,15 @@
 package dev.mock.mini.service;
 
+import dev.mock.mini.Constants;
+import dev.mock.mini.cache.MockRuleCache;
 import dev.mock.mini.common.dto.IdResponse;
 import dev.mock.mini.common.dto.MockRuleDto;
 import dev.mock.mini.common.exception.BadRequestException;
-import dev.mock.mini.common.mapper.MockRuleMapper;
 import dev.mock.mini.common.util.IdGenerator;
+import dev.mock.mini.common.util.StringUtil;
 import dev.mock.mini.common.validation.MockRuleValidator;
 import dev.mock.mini.repository.MockRuleRepository;
+import dev.mock.mini.repository.model.MockRule;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Timestamp;
@@ -18,12 +21,12 @@ import java.util.Objects;
 public class MockRuleService {
 
     private final MockRuleRepository mockRuleRepository;
-    private final MockRuleMapper mockRuleMapper;
+    private final MockRuleCache mockRuleCache;
     private final MockRuleValidator mockRuleValidator;
 
     public MockRuleService(MockRuleRepository mockRuleRepository) {
         this.mockRuleRepository = mockRuleRepository;
-        this.mockRuleMapper = new MockRuleMapper();
+        this.mockRuleCache = new MockRuleCache();
         this.mockRuleValidator = new MockRuleValidator();
         log.info("MockRuleService initialized");
     }
@@ -31,11 +34,35 @@ public class MockRuleService {
     public IdResponse createMockRule(MockRuleDto mockRuleDto) {
         mockRuleValidator.validateMockRule(mockRuleDto);
 
-        var mockRule = mockRuleMapper.toEntity(mockRuleDto);
+        var persistedRules = getAll();
+        if (persistedRules.size() >= Constants.MAX_MOCK_RULES) {
+            throw new BadRequestException("Reached max number of Mock Rules (max: " + Constants.MAX_MOCK_RULES + ")");
+        }
+        var method = mockRuleDto.getMethod().toUpperCase();
+        var path = StringUtil.removeTrailingSlash(mockRuleDto.getPath().toLowerCase());
+        var duplicate = persistedRules.stream()
+                .filter(Objects::nonNull)
+                .filter(m -> m.getMethod().equals(method))
+                .filter(m -> m.getPath().equals(path))
+                .findFirst()
+                .orElse(null);
+        if (Objects.nonNull(duplicate)) {
+            throw new BadRequestException("Mock Rule already exists by method and path");
+        }
+
         var mockRuleId = IdGenerator.generateId();
+        var mockRule = new MockRule();
         mockRule.setId(mockRuleId);
+        mockRule.setMethod(method);
+        mockRule.setPath(path);
+        mockRule.setHeaders(mockRuleDto.getHeaders());
+        mockRule.setBody(mockRuleDto.getBody());
+        mockRule.setStatusCode(mockRuleDto.getStatusCode());
+        mockRule.setDelay(mockRuleDto.getDelay());
         mockRule.setCreated(Timestamp.valueOf(LocalDateTime.now()));
+
         mockRuleRepository.createRule(mockRule);
+        mockRuleCache.clear();
 
         log.info("Mock rule successfully created: {}", mockRule.getId());
         return new IdResponse(mockRuleId);
@@ -43,27 +70,44 @@ public class MockRuleService {
 
     public IdResponse updateMockRule(String mockRuleId, MockRuleDto mockRuleDto) {
         if (Objects.isNull(mockRuleId) || mockRuleId.isBlank()) {
-            throw new BadRequestException("id is null or blank");
+            throw new BadRequestException("Mock rule id is required");
         }
 
         mockRuleValidator.validateMockRule(mockRuleDto);
 
-        // todo: later use cache
-        findAll().stream()
+        var mockRule = getAll().stream()
                 .filter(Objects::nonNull)
                 .filter(m -> m.getId().equals(mockRuleId)).findFirst()
                 .orElseThrow(() -> new BadRequestException("Unable to find mock rule with id: " + mockRuleId));
 
-        var mockRule = mockRuleMapper.toEntity(mockRuleDto);
+        mockRule.setMethod(mockRuleDto.getMethod().toUpperCase());
+        mockRule.setPath(StringUtil.removeTrailingSlash(mockRuleDto.getPath().toLowerCase()));
+        mockRule.setHeaders(mockRuleDto.getHeaders());
+        mockRule.setBody(mockRuleDto.getBody());
+        mockRule.setStatusCode(mockRuleDto.getStatusCode());
+        mockRule.setDelay(mockRuleDto.getDelay());
         mockRuleRepository.updateRule(mockRuleId, mockRule);
+        mockRuleCache.clear();
+
         log.info("Mock rule successfully updated: {}", mockRuleId);
         return new IdResponse(mockRuleId);
     }
 
     public List<MockRuleDto> findAll() {
-        return mockRuleRepository.findAll()
-                .stream()
-                .map(mockRuleMapper::toDto).toList();
+        var cachedList = mockRuleCache.getMockRules();
+        if (Objects.nonNull(cachedList) && !cachedList.isEmpty()) {
+            return cachedList;
+        }
+
+        var list = getAll().stream()
+                .map(m -> {
+                    var dto = toDto(m);
+                    dto.compilePattern();
+                    return dto;
+                })
+                .toList();
+        mockRuleCache.addMockRules(list);
+        return list;
     }
 
     public void deleteMockRule(String mockRuleId) {
@@ -72,6 +116,24 @@ public class MockRuleService {
         }
 
         mockRuleRepository.deleteMockRule(mockRuleId);
+        mockRuleCache.clear();
         log.info("Mock rule successfully deleted: {}", mockRuleId);
+    }
+
+    private List<MockRule> getAll() {
+        return mockRuleRepository.findAll();
+    }
+
+    private MockRuleDto toDto(MockRule mockRule) {
+        var mockRuleDto = new MockRuleDto();
+        mockRuleDto.setId(mockRule.getId());
+        mockRuleDto.setMethod(mockRule.getMethod());
+        mockRuleDto.setPath(mockRule.getPath());
+        mockRuleDto.setHeaders(mockRule.getHeaders());
+        mockRuleDto.setBody(mockRule.getBody());
+        mockRuleDto.setStatusCode(mockRule.getStatusCode());
+        mockRuleDto.setDelay(mockRule.getDelay());
+        mockRuleDto.setCreated(mockRule.getCreated());
+        return mockRuleDto;
     }
 }

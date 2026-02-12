@@ -99,6 +99,14 @@
   "name":"java.sql.Date"
 },
 {
+  "name":"java.sql.SQLException",
+  "fields":[{"name":"next"}]
+},
+{
+  "name":"java.util.HashMap",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"java.util.ImmutableCollections$ListN",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
