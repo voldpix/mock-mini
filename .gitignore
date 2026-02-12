@@ -30,3 +30,4 @@ target/
 .DS_Store
 
 /mock-mini-linux
+/data

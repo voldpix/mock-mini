@@ -14,4 +14,7 @@ docker rm mock-mini-extract
 
 chmod +x mock-mini-linux
 
+# reduce size
+strip -s mock-mini-linux
+
 echo "Build complete: mock-mini-linux"

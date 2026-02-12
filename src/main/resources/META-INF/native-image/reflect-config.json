@@ -1,45 +1,21 @@
 [
 {
-  "name":"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
-  "queryAllPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"[Lcom.zaxxer.hikari.util.ConcurrentBag$IConcurrentBagEntry;"
 },
 {
-  "name":"ch.qos.logback.classic.util.DefaultJoranConfigurator",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"[Ljava.sql.Statement;"
 },
 {
-  "name":"ch.qos.logback.core.ConsoleAppender",
-  "queryAllPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"com.zaxxer.hikari.HikariConfig",
+  "allDeclaredFields":true
 },
 {
-  "name":"ch.qos.logback.core.OutputStreamAppender",
-  "methods":[{"name":"setEncoder","parameterTypes":["ch.qos.logback.core.encoder.Encoder"] }]
+  "name":"com.zaxxer.hikari.pool.PoolBase",
+  "fields":[{"name":"catalog"}]
 },
 {
-  "name":"ch.qos.logback.core.encoder.Encoder",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"ch.qos.logback.core.encoder.LayoutWrappingEncoder",
-  "methods":[{"name":"setParent","parameterTypes":["ch.qos.logback.core.spi.ContextAware"] }]
-},
-{
-  "name":"ch.qos.logback.core.pattern.PatternLayoutEncoderBase",
-  "methods":[{"name":"setPattern","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"ch.qos.logback.core.spi.ContextAware",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"ch.qos.logback.core.status.NopStatusListener",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"com.zaxxer.hikari.pool.PoolEntry",
+  "fields":[{"name":"state"}]
 },
 {
   "name":"java.lang.Boolean",
@@ -105,6 +81,10 @@
   "name":"java.sql.Date"
 },
 {
+  "name":"java.sql.SQLException",
+  "fields":[{"name":"next"}]
+},
+{
   "name":"java.util.concurrent.Executors",
   "methods":[{"name":"newThreadPerTaskExecutor","parameterTypes":["java.util.concurrent.ThreadFactory"] }, {"name":"newVirtualThreadPerTaskExecutor","parameterTypes":[] }]
 },
@@ -146,13 +126,24 @@
   "name":"org.eclipse.jetty.websocket.server.JettyWebSocketServlet"
 },
 {
+  "name":"org.slf4j.Logger"
+},
+{
   "name":"org.slf4j.impl.StaticLoggerBinder"
 },
 {
   "name":"org.slf4j.spi.SLF4JServiceProvider"
 },
 {
+  "name":"org.sqlite.JDBC",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sun.security.provider.NativePRNG",
   "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"<init>","parameterTypes":["java.security.SecureRandomParameters"] }]
+},
+{
+  "name":"sun.security.provider.SHA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 }
 ]

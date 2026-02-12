@@ -10,4 +10,5 @@ public final class Constants {
 
     public static final int PORT = Env.getInt("PORT", 9001);
 
+    public static final String DB_PATH = "data/mock-mini.db";
 }

@@ -25,6 +25,9 @@ public class MockMiniServer {
             throw new IllegalStateException("MockMiniServer.class has not been initialized");
         }
 
+        Database.initialize();
+        registerShutdownHook();
+
         int port = Constants.PORT;
         this.app.start(port);
 
@@ -67,5 +70,19 @@ public class MockMiniServer {
                 return gson.fromJson(json, targetType);
             }
         };
+    }
+
+    private void registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Shutdown signal received. Stopping server...");
+            if (Objects.nonNull(app)) {
+                app.stop();
+                log.info("Javalin server stopped");
+            }
+
+            Database.close();
+            log.info("Graceful shutdown completed");
+        }, "shutdown-hook"));
+        log.info("Shutdown hook registered");
     }
 }

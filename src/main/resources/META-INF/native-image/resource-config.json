@@ -3,15 +3,15 @@
   "includes":[{
     "pattern":"\\QMETA-INF/maven/io.javalin/javalin/pom.properties\\E"
   }, {
-    "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+    "pattern":"\\QMETA-INF/maven/org.xerial/sqlite-jdbc/pom.properties\\E"
   }, {
     "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
   }, {
     "pattern":"\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
   }, {
-    "pattern":"\\QMETA-INF/services/java.util.spi.ResourceBundleControlProvider\\E"
+    "pattern":"\\QMETA-INF/services/java.sql.Driver\\E"
   }, {
-    "pattern":"\\QMETA-INF/services/javax.xml.parsers.SAXParserFactory\\E"
+    "pattern":"\\QMETA-INF/services/java.util.spi.ResourceBundleControlProvider\\E"
   }, {
     "pattern":"\\QMETA-INF/services/org.eclipse.jetty.http.HttpFieldPreEncoder\\E"
   }, {
@@ -19,19 +19,17 @@
   }, {
     "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
   }, {
-    "pattern":"\\Qch/qos/logback/classic/logback-classic-version.properties\\E"
-  }, {
-    "pattern":"\\Qch/qos/logback/core/logback-core-version.properties\\E"
-  }, {
-    "pattern":"\\Qlogback-test.xml\\E"
-  }, {
-    "pattern":"\\Qlogback.xml\\E"
-  }, {
     "pattern":"\\Qorg/eclipse/jetty/http/encoding.properties\\E"
   }, {
     "pattern":"\\Qorg/eclipse/jetty/http/mime.properties\\E"
   }, {
     "pattern":"\\Qorg/eclipse/jetty/version/build.properties\\E"
+  }, {
+    "pattern":"\\Qorg/sqlite/native/Linux/x86_64/libsqlitejdbc.so\\E"
+  }, {
+    "pattern":"\\Qschema.sql\\E"
+  }, {
+    "pattern":"\\Qsimplelogger.properties\\E"
   }, {
     "pattern":"\\Qstatic\\E"
   }]},
