@@ -18,12 +18,26 @@
   "fields":[{"name":"state"}]
 },
 {
+  "name":"dev.mock.mini.common.dto.IdResponse",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"dev.mock.mini.common.dto.MockRuleDto",
+  "allDeclaredFields":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"java.lang.Boolean",
   "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"java.lang.Byte",
   "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.lang.Class",
+  "methods":[{"name":"getRecordComponents","parameterTypes":[] }, {"name":"isRecord","parameterTypes":[] }]
 },
 {
   "name":"java.lang.Double",
@@ -71,6 +85,10 @@
   "methods":[{"name":"getUptime","parameterTypes":[] }]
 },
 {
+  "name":"java.lang.reflect.RecordComponent",
+  "methods":[{"name":"getName","parameterTypes":[] }, {"name":"getType","parameterTypes":[] }]
+},
+{
   "name":"java.security.AccessController",
   "methods":[{"name":"doPrivileged","parameterTypes":["java.security.PrivilegedAction"] }]
 },
@@ -81,8 +99,12 @@
   "name":"java.sql.Date"
 },
 {
-  "name":"java.sql.SQLException",
-  "fields":[{"name":"next"}]
+  "name":"java.util.HashMap",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.ImmutableCollections$ListN",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"java.util.concurrent.Executors",

@@ -28,7 +28,9 @@ docker run --rm \
 
     echo 'Checking endpoints...'
     curl -v http://localhost:9001/health
+    curl -v http://localhost:9001/native
     curl -v http://localhost:9001/
+    curl -v http://localhost:9001/mock-rules
 
     echo 'Stopping server...'
     kill \$PID

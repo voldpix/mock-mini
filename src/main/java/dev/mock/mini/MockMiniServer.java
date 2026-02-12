@@ -1,6 +1,7 @@
 package dev.mock.mini;
 
 import com.google.gson.GsonBuilder;
+import dev.mock.mini.common.dto.IdResponse;
 import dev.mock.mini.common.dto.MockRuleDto;
 import dev.mock.mini.common.exception.BadRequestException;
 import dev.mock.mini.repository.MockRuleRepository;
@@ -75,6 +76,14 @@ public class MockMiniServer {
 
     private void setupRoutes() {
         app.get("/health", ctx -> ctx.result("OK"));
+
+        // for native build (reflect-config.json)
+        app.get("/native", ctx -> {
+           var map = new HashMap<String, Object>();
+           map.put("IdResponse", new IdResponse());
+           map.put("MockRuleDto", new MockRuleDto());
+           ctx.json(map);
+        });
 
         app.post("/mock-rules", ctx -> {
             var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);

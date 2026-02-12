@@ -32,12 +32,13 @@ public class MockRuleService {
         mockRuleValidator.validateMockRule(mockRuleDto);
 
         var mockRule = mockRuleMapper.toEntity(mockRuleDto);
-        mockRule.setId(IdGenerator.generateId());
+        var mockRuleId = IdGenerator.generateId();
+        mockRule.setId(mockRuleId);
         mockRule.setCreated(Timestamp.valueOf(LocalDateTime.now()));
         mockRuleRepository.createRule(mockRule);
 
         log.info("Mock rule successfully created: {}", mockRule.getId());
-        return new IdResponse("OK");
+        return new IdResponse(mockRuleId);
     }
 
     public IdResponse updateMockRule(String mockRuleId, MockRuleDto mockRuleDto) {

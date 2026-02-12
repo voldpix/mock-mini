@@ -128,6 +128,8 @@
                                 <arg>-O2</arg>
                                 <arg>--gc=serial</arg>
                                 <arg>-march=compatibility</arg>
+                                <!-- static resources -->
+                                <arg>-H:IncludeResources=static/.*|schema.sql|simplelogger.properties</arg>
                             </buildArgs>
                         </configuration>
                         <executions>
