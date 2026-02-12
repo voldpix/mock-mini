@@ -1,6 +1,10 @@
 package dev.mock.mini;
 
 import com.google.gson.GsonBuilder;
+import dev.mock.mini.common.dto.MockRuleDto;
+import dev.mock.mini.common.exception.BadRequestException;
+import dev.mock.mini.repository.MockRuleRepository;
+import dev.mock.mini.service.MockRuleService;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
@@ -9,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Objects;
 
 @Slf4j
@@ -16,8 +21,10 @@ public class MockMiniServer {
 
     private Javalin app;
 
+    private MockRuleService mockRuleService;
+
     public MockMiniServer() {
-        buildServer();
+        configureServer();
     }
 
     public void start() {
@@ -26,9 +33,10 @@ public class MockMiniServer {
         }
 
         Database.initialize();
+        initializeInstances();
         registerShutdownHook();
 
-        int port = Constants.PORT;
+        var port = Constants.PORT;
         this.app.start(port);
 
         log.info("Mock Mini Server started on port {}, version: {}", port, Constants.APP_VERSION);
@@ -36,7 +44,13 @@ public class MockMiniServer {
         log.info("Execution path: http://localhost:{}/m", port);
     }
 
-    private void buildServer() {
+    private void initializeInstances() {
+        var mockRuleRepository = new MockRuleRepository();
+
+        this.mockRuleService = new MockRuleService(mockRuleRepository);
+    }
+
+    private void configureServer() {
         this.app = Javalin.create(config -> {
             config.showJavalinBanner = false;
             config.useVirtualThreads = true;
@@ -47,12 +61,44 @@ public class MockMiniServer {
             config.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
         });
 
+        setupExceptions();
         setupRoutes();
+    }
+
+    private void setupExceptions() {
+        var errorMap = new HashMap<String, Object>();
+        app.exception(BadRequestException.class, (e, ctx) -> {
+            errorMap.put("error", e.getMessage());
+            ctx.status(400).json(errorMap);
+        });
     }
 
     private void setupRoutes() {
         app.get("/health", ctx -> ctx.result("OK"));
 
+        app.post("/mock-rules", ctx -> {
+            var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);
+            var result = mockRuleService.createMockRule(mockRuleDto);
+            ctx.status(201).json(result);
+        });
+
+        app.put("/mock-rules/{id}", ctx -> {
+            var mockRuleId = ctx.pathParam("id");
+            var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);
+            var result = mockRuleService.updateMockRule(mockRuleId, mockRuleDto);
+            ctx.status(200).json(result);
+        });
+
+        app.get("/mock-rules", ctx -> {
+            var mockRules = mockRuleService.findAll();
+            ctx.json(mockRules);
+        });
+
+        app.delete("/mock-rules/{id}", ctx -> {
+            var mockRuleId = ctx.pathParam("id");
+            mockRuleService.deleteMockRule(mockRuleId);
+            ctx.status(204);
+        });
     }
 
     private JsonMapper gsonMapper() {

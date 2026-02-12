@@ -26,7 +26,7 @@ public class MockRuleRepository {
             stmt.setString(4, mockRule.getHeaders());
             stmt.setString(5, mockRule.getBody());
             stmt.setInt(6, mockRule.getStatusCode());
-            stmt.setLong(7, mockRule.getDelay());
+            stmt.setInt(7, mockRule.getDelay());
             stmt.setTimestamp(8, mockRule.getCreated());
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -34,9 +34,61 @@ public class MockRuleRepository {
         }
     }
 
+    public void updateRule(String mockRuleId, MockRule mockRule) {
+        var sql = """
+            UPDATE mock_rules
+            SET method = ?,
+                path = ?,
+                headers = ?,
+                body = ?,
+                status_code = ?,
+                delay = ?
+            WHERE id = ?
+            """;
+
+        try (var conn = Database.getConnection(); var stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, mockRule.getMethod());
+            stmt.setString(2, mockRule.getPath());
+            stmt.setString(3, mockRule.getHeaders());
+            stmt.setString(4, mockRule.getBody());
+            stmt.setInt(5, mockRule.getStatusCode());
+            stmt.setInt(6, mockRule.getDelay());
+            stmt.setString(7, mockRuleId);
+
+            int affected = stmt.executeUpdate();
+            if (affected == 0) {
+                log.info("No mock rule found with id={}", mockRule.getId());
+            }
+
+        } catch (SQLException e) {
+            log.error("Failed to update mock rule with id={}", mockRule.getId(), e);
+        }
+    }
+
+    public MockRule findById(String mockRuleId) {
+        var sql = """
+            SELECT id, method, path, headers, body, status_code, delay, created_at
+            FROM mock_rules
+            WHERE id = ?
+            """;
+
+        try (var conn = Database.getConnection(); var stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, mockRuleId);
+            try (var rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed to find mock rule with id={}", mockRuleId, e);
+        }
+
+        return null;
+    }
+
     public List<MockRule> findAll() {
         var sql = """
-                SELECT * FROM mock_rules ORDER BY created_at DESC;
+                SELECT id, method, path, headers, body, status_code, delay, created_at FROM mock_rules ORDER BY created_at DESC;
         """;
 
         var mockRules = new ArrayList<MockRule>();
@@ -48,6 +100,22 @@ public class MockRuleRepository {
             log.error("Failed to find mock rules", e);
         }
         return mockRules;
+    }
+
+    public void deleteMockRule(String mockRuleId) {
+        var sql = """
+                DELETE FROM mock_rules WHERE id = ?;
+        """;
+
+        try (var conn = Database.getConnection(); var stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, mockRuleId);
+            int affected = stmt.executeUpdate();
+            if (affected == 0) {
+                log.warn("No mock rule found with id={}", mockRuleId);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to delete mock rule with id={}", mockRuleId, e);
+        }
     }
 
     private MockRule mapRow(ResultSet rs) {
