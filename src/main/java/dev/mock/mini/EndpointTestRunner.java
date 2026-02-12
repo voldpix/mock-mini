@@ -19,7 +19,7 @@ public class EndpointTestRunner {
     public static void main(String[] args) throws IOException, InterruptedException {
         try (var client = HttpClient.newHttpClient()) {
             call(client, "GET", SERVER_URL + "/health", null);
-            var createResult = call(client, "POST", SERVER_URL + "/mock-rules", """
+            var createResult = call(client, "POST", SERVER_URL + "/rules", """
                     {
                       "method": "GET",
                       "path": "/api/path",
@@ -28,7 +28,7 @@ public class EndpointTestRunner {
                     }
                     """);
             var createdId = extractId(createResult);
-            var updateResult = call(client, "PUT", SERVER_URL + "/mock-rules/" + createdId, """
+            var updateResult = call(client, "PUT", SERVER_URL + "/rules/" + createdId, """
                     {
                       "method": "POST",
                       "path": "/api/path",
@@ -39,8 +39,8 @@ public class EndpointTestRunner {
             var updatedId = extractId(updateResult);
             System.out.println("IDs match: " + updatedId.equals(createdId));
 
-            call(client, "GET", SERVER_URL + "/mock-rules", null);
-            call(client, "DELETE", SERVER_URL + "/mock-rules/" + updatedId, null);
+            call(client, "GET", SERVER_URL + "/rules", null);
+            call(client, "DELETE", SERVER_URL + "/rules/" + updatedId, null);
         }
     }
 

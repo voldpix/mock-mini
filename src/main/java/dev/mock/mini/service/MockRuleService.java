@@ -22,18 +22,14 @@ public class MockRuleService {
 
     private final MockRuleRepository mockRuleRepository;
     private final MockRuleCache mockRuleCache;
-    private final MockRuleValidator mockRuleValidator;
 
     public MockRuleService(MockRuleRepository mockRuleRepository) {
         this.mockRuleRepository = mockRuleRepository;
         this.mockRuleCache = new MockRuleCache();
-        this.mockRuleValidator = new MockRuleValidator();
         log.info("MockRuleService initialized");
     }
 
     public IdResponse createMockRule(MockRuleDto mockRuleDto) {
-        mockRuleValidator.validateMockRule(mockRuleDto);
-
         var persistedRules = getAll();
         if (persistedRules.size() >= Constants.MAX_MOCK_RULES) {
             throw new BadRequestException("Reached max number of Mock Rules (max: " + Constants.MAX_MOCK_RULES + ")");
@@ -69,12 +65,6 @@ public class MockRuleService {
     }
 
     public IdResponse updateMockRule(String mockRuleId, MockRuleDto mockRuleDto) {
-        if (Objects.isNull(mockRuleId) || mockRuleId.isBlank()) {
-            throw new BadRequestException("Mock rule id is required");
-        }
-
-        mockRuleValidator.validateMockRule(mockRuleDto);
-
         var mockRule = getAll().stream()
                 .filter(Objects::nonNull)
                 .filter(m -> m.getId().equals(mockRuleId)).findFirst()
@@ -111,10 +101,6 @@ public class MockRuleService {
     }
 
     public void deleteMockRule(String mockRuleId) {
-        if (Objects.isNull(mockRuleId) || mockRuleId.isBlank()) {
-            throw new BadRequestException("id is null or blank");
-        }
-
         mockRuleRepository.deleteMockRule(mockRuleId);
         mockRuleCache.clear();
         log.info("Mock rule successfully deleted: {}", mockRuleId);

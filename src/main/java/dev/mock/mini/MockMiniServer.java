@@ -1,11 +1,14 @@
 package dev.mock.mini;
 
 import com.google.gson.GsonBuilder;
-import dev.mock.mini.common.dto.MockRuleDto;
 import dev.mock.mini.common.exception.BadRequestException;
+import dev.mock.mini.controller.MockExecutionController;
+import dev.mock.mini.controller.MockRuleController;
 import dev.mock.mini.repository.MockRuleRepository;
+import dev.mock.mini.service.MockExecutionService;
 import dev.mock.mini.service.MockRuleService;
 import io.javalin.Javalin;
+import io.javalin.http.HandlerType;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
@@ -22,6 +25,10 @@ public class MockMiniServer {
     private Javalin app;
 
     private MockRuleService mockRuleService;
+    private MockExecutionService mockExecutionService;
+
+    private MockRuleController mockRuleController;
+    private MockExecutionController mockExecutionController;
 
     public MockMiniServer() {
         configureServer();
@@ -48,6 +55,10 @@ public class MockMiniServer {
         var mockRuleRepository = new MockRuleRepository();
 
         this.mockRuleService = new MockRuleService(mockRuleRepository);
+        this.mockExecutionService = new MockExecutionService(mockRuleService);
+
+        this.mockRuleController = new MockRuleController(mockRuleService);
+        this.mockExecutionController = new MockExecutionController(mockRuleService, mockExecutionService);
     }
 
     private void configureServer() {
@@ -76,29 +87,30 @@ public class MockMiniServer {
     private void setupRoutes() {
         app.get("/health", ctx -> ctx.result("OK"));
 
-        app.post("/mock-rules", ctx -> {
-            var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);
-            var result = mockRuleService.createMockRule(mockRuleDto);
-            ctx.status(201).json(result);
-        });
+        app.post("/rules", ctx -> mockRuleController.createMockRule(ctx));
+        app.put("/rules/{id}", ctx -> mockRuleController.updateMockRule(ctx));
+        app.get("/rules", ctx -> mockRuleController.getMockRules(ctx));
+        app.delete("/rules/{id}", ctx -> mockRuleController.deleteMockRule(ctx));
 
-        app.put("/mock-rules/{id}", ctx -> {
-            var mockRuleId = ctx.pathParam("id");
-            var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);
-            var result = mockRuleService.updateMockRule(mockRuleId, mockRuleDto);
-            ctx.status(200).json(result);
-        });
+        setupMockExecutionRoutes();
+    }
 
-        app.get("/mock-rules", ctx -> {
-            var mockRules = mockRuleService.findAll();
-            ctx.json(mockRules);
-        });
+    // workaround
+    private void setupMockExecutionRoutes() {
+        String[] paths = {"/m", "/m/*"};
+        HandlerType[] methods = {
+                HandlerType.GET,
+                HandlerType.POST,
+                HandlerType.PUT,
+                HandlerType.PATCH,
+                HandlerType.DELETE
+        };
 
-        app.delete("/mock-rules/{id}", ctx -> {
-            var mockRuleId = ctx.pathParam("id");
-            mockRuleService.deleteMockRule(mockRuleId);
-            ctx.status(204);
-        });
+        for (var path : paths) {
+            for (var method : methods) {
+                app.addHttpHandler(method, path, ctx -> mockExecutionController.execute(ctx));
+            }
+        }
     }
 
     private JsonMapper gsonMapper() {
