@@ -35,9 +35,9 @@
   }]},
   "bundles":[{
     "name":"jakarta.servlet.LocalStrings",
-    "locales":[""]
+    "locales":["", "und"]
   }, {
     "name":"jakarta.servlet.http.LocalStrings",
-    "locales":[""]
+    "locales":["", "und"]
   }]
 }

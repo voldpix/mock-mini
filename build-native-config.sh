@@ -3,6 +3,8 @@ set -e
 
 CONFIG_REL_PATH="src/main/resources/META-INF/native-image"
 
+mvn clean package -DskipTests
+
 echo "Building the Agent Runner image..."
 docker build -t mock-mini-agent -f Dockerfile-agent .
 
@@ -26,11 +28,14 @@ docker run --rm \
     echo 'Waiting for server...'
     sleep 5
 
-    echo 'Checking endpoints...'
-    curl -v http://localhost:9001/health
-    curl -v http://localhost:9001/native
-    curl -v http://localhost:9001/
-    curl -v http://localhost:9001/mock-rules
+    echo 'Running flow test...'
+    java -cp target/mock-mini.jar dev.mock.mini.EndpointTestRunner
+
+#    echo 'Checking endpoints...'
+#    curl -v http://localhost:9001/health
+#    curl -v http://localhost:9001/native
+#    curl -v http://localhost:9001/
+#    curl -v http://localhost:9001/mock-rules
 
     echo 'Stopping server...'
     kill \$PID

@@ -77,14 +77,6 @@ public class MockMiniServer {
     private void setupRoutes() {
         app.get("/health", ctx -> ctx.result("OK"));
 
-        // for native build (reflect-config.json)
-        app.get("/native", ctx -> {
-           var map = new HashMap<String, Object>();
-           map.put("IdResponse", new IdResponse());
-           map.put("MockRuleDto", new MockRuleDto());
-           ctx.json(map);
-        });
-
         app.post("/mock-rules", ctx -> {
             var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);
             var result = mockRuleService.createMockRule(mockRuleDto);
