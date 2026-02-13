@@ -1,13 +1,11 @@
 package dev.mock.mini.service;
 
 import dev.mock.mini.Constants;
-import dev.mock.mini.cache.MockRuleCache;
 import dev.mock.mini.common.dto.IdResponse;
 import dev.mock.mini.common.dto.MockRuleDto;
 import dev.mock.mini.common.exception.BadRequestException;
 import dev.mock.mini.common.util.IdGenerator;
 import dev.mock.mini.common.util.StringUtil;
-import dev.mock.mini.common.validation.MockRuleValidator;
 import dev.mock.mini.repository.MockRuleRepository;
 import dev.mock.mini.repository.model.MockRule;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +19,9 @@ import java.util.Objects;
 public class MockRuleService {
 
     private final MockRuleRepository mockRuleRepository;
-    private final MockRuleCache mockRuleCache;
 
     public MockRuleService(MockRuleRepository mockRuleRepository) {
         this.mockRuleRepository = mockRuleRepository;
-        this.mockRuleCache = new MockRuleCache();
         log.info("MockRuleService initialized");
     }
 
@@ -57,9 +53,7 @@ public class MockRuleService {
         mockRule.setDelay(mockRuleDto.getDelay());
         mockRule.setCreated(Timestamp.valueOf(LocalDateTime.now()));
 
-        mockRuleRepository.createRule(mockRule);
-        mockRuleCache.clear();
-
+        mockRuleRepository.upsertRule(mockRule);
         log.info("Mock rule successfully created: {}", mockRule.getId());
         return new IdResponse(mockRuleId);
     }
@@ -76,38 +70,29 @@ public class MockRuleService {
         mockRule.setBody(mockRuleDto.getBody());
         mockRule.setStatusCode(mockRuleDto.getStatusCode());
         mockRule.setDelay(mockRuleDto.getDelay());
-        mockRuleRepository.updateRule(mockRuleId, mockRule);
-        mockRuleCache.clear();
+        mockRuleRepository.upsertRule(mockRule);
 
         log.info("Mock rule successfully updated: {}", mockRuleId);
         return new IdResponse(mockRuleId);
     }
 
     public List<MockRuleDto> findAll() {
-        var cachedList = mockRuleCache.getMockRules();
-        if (Objects.nonNull(cachedList) && !cachedList.isEmpty()) {
-            return cachedList;
-        }
-
-        var list = getAll().stream()
+        return getAll().stream()
                 .map(m -> {
                     var dto = toDto(m);
                     dto.compilePattern();
                     return dto;
                 })
                 .toList();
-        mockRuleCache.addMockRules(list);
-        return list;
     }
 
     public void deleteMockRule(String mockRuleId) {
-        mockRuleRepository.deleteMockRule(mockRuleId);
-        mockRuleCache.clear();
+        mockRuleRepository.deleteRule(mockRuleId);
         log.info("Mock rule successfully deleted: {}", mockRuleId);
     }
 
     private List<MockRule> getAll() {
-        return mockRuleRepository.findAll();
+        return mockRuleRepository.getMockRules();
     }
 
     private MockRuleDto toDto(MockRule mockRule) {

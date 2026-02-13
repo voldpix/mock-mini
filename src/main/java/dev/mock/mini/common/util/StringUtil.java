@@ -16,20 +16,6 @@ public final class StringUtil {
         return requestPath;
     }
 
-    public static String extractMockRulePath(String requestPath) {
-        if (Objects.isNull(requestPath)) return "/";
-
-        var prefix = "/m";
-        if (requestPath.equals(prefix)) {
-            return "/";
-        }
-
-        if (requestPath.startsWith(prefix + "/")) {
-            return requestPath.substring(prefix.length());
-        }
-        return requestPath;
-    }
-
     public static int countWildcards(String path) {
         if (Objects.isNull(path)) return 0;
         return Math.toIntExact(path.chars().filter(ch -> ch == '*').count());

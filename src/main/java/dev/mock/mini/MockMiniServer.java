@@ -1,31 +1,24 @@
 package dev.mock.mini;
 
 import com.google.gson.GsonBuilder;
-import dev.mock.mini.common.exception.BadRequestException;
+import dev.mock.mini.common.exception.MockMiniException;
 import dev.mock.mini.controller.MockExecutionController;
 import dev.mock.mini.controller.MockRuleController;
 import dev.mock.mini.repository.MockRuleRepository;
 import dev.mock.mini.service.MockExecutionService;
 import dev.mock.mini.service.MockRuleService;
-import io.javalin.Javalin;
-import io.javalin.http.HandlerType;
-import io.javalin.http.staticfiles.Location;
-import io.javalin.json.JsonMapper;
-import io.javalin.plugin.bundled.CorsPluginConfig;
+import dev.voldpix.loomera.Loomera;
+import dev.voldpix.loomera.json.JsonProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Objects;
 
 @Slf4j
 public class MockMiniServer {
 
-    private Javalin app;
-
-    private MockRuleService mockRuleService;
-    private MockExecutionService mockExecutionService;
+    private Loomera app;
 
     private MockRuleController mockRuleController;
     private MockExecutionController mockExecutionController;
@@ -39,12 +32,17 @@ public class MockMiniServer {
             throw new IllegalStateException("MockMiniServer.class has not been initialized");
         }
 
-        Database.initialize();
+        DatabaseManager.initialize();
         initializeInstances();
         registerShutdownHook();
 
         var port = Constants.PORT;
-        this.app.start(port);
+        this.app.port(port);
+        try {
+            this.app.start();
+        } catch (IOException e) {
+            throw new MockMiniException("Exception starting Mock Mini", e);
+        }
 
         log.info("Mock Mini Server started on port {}, version: {}", port, Constants.APP_VERSION);
         log.info("Dashboard UI: http://localhost:{}", port);
@@ -54,78 +52,54 @@ public class MockMiniServer {
     private void initializeInstances() {
         var mockRuleRepository = new MockRuleRepository();
 
-        this.mockRuleService = new MockRuleService(mockRuleRepository);
-        this.mockExecutionService = new MockExecutionService(mockRuleService);
+        var mockRuleService = new MockRuleService(mockRuleRepository);
+        var mockExecutionService = new MockExecutionService(mockRuleService);
 
         this.mockRuleController = new MockRuleController(mockRuleService);
         this.mockExecutionController = new MockExecutionController(mockRuleService, mockExecutionService);
     }
 
     private void configureServer() {
-        this.app = Javalin.create(config -> {
-            config.showJavalinBanner = false;
-            config.useVirtualThreads = true;
+        this.app = new Loomera();
+        this.app.jsonProvider(gsonMapper());
 
-            config.jsonMapper(gsonMapper());
-
-            config.staticFiles.add("/static", Location.CLASSPATH);
-            config.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
-        });
-
-        setupExceptions();
         setupRoutes();
     }
 
-    private void setupExceptions() {
-        var errorMap = new HashMap<String, Object>();
-        app.exception(BadRequestException.class, (e, ctx) -> {
-            errorMap.put("error", e.getMessage());
-            ctx.status(400).json(errorMap);
-        });
-    }
-
     private void setupRoutes() {
-        app.get("/health", ctx -> ctx.result("OK"));
+        app.at("/health").get().handle(ctx -> ctx.result("OK"));
+        app.at("/rules").post().handle(ctx -> mockRuleController.createMockRule(ctx));
+        app.at("/rules/:id").put().handle(ctx -> mockRuleController.updateMockRule(ctx));
+        app.at("/rules/:id").delete().handle(ctx -> mockRuleController.deleteMockRule(ctx));
+        app.at("/rules").get().handle(ctx -> mockRuleController.getMockRules(ctx));
 
-        app.post("/rules", ctx -> mockRuleController.createMockRule(ctx));
-        app.put("/rules/{id}", ctx -> mockRuleController.updateMockRule(ctx));
-        app.get("/rules", ctx -> mockRuleController.getMockRules(ctx));
-        app.delete("/rules/{id}", ctx -> mockRuleController.deleteMockRule(ctx));
-
-        setupMockExecutionRoutes();
-    }
-
-    // workaround
-    private void setupMockExecutionRoutes() {
         String[] paths = {"/m", "/m/*"};
-        HandlerType[] methods = {
-                HandlerType.GET,
-                HandlerType.POST,
-                HandlerType.PUT,
-                HandlerType.PATCH,
-                HandlerType.DELETE
-        };
-
         for (var path : paths) {
-            for (var method : methods) {
-                app.addHttpHandler(method, path, ctx -> mockExecutionController.execute(ctx));
-            }
+            app.at(path).get().handle(ctx -> mockExecutionController.execute(ctx));
+            app.at(path).post().handle(ctx -> mockExecutionController.execute(ctx));
+            app.at(path).put().handle(ctx -> mockExecutionController.execute(ctx));
+            app.at(path).patch().handle(ctx -> mockExecutionController.execute(ctx));
+            app.at(path).delete().handle(ctx -> mockExecutionController.execute(ctx));
         }
     }
 
-    private JsonMapper gsonMapper() {
+    private JsonProvider gsonMapper() {
         var gson = new GsonBuilder().create();
-        return new JsonMapper() {
-            @NotNull
+        return new JsonProvider() {
+
             @Override
-            public String toJsonString(@NotNull Object obj, @NotNull Type type) {
-                return gson.toJson(obj);
+            public String toJson(Object o) {
+                return gson.toJson(o);
             }
 
-            @NotNull
             @Override
-            public <T> T fromJsonString(@NotNull String json, @NotNull Type targetType) {
-                return gson.fromJson(json, targetType);
+            public <T> T fromJson(String s, Class<T> aClass) {
+                return gson.fromJson(s, aClass);
+            }
+
+            @Override
+            public <T> T fromJson(String s, Type type) {
+                return gson.fromJson(s, type);
             }
         };
     }
@@ -135,10 +109,10 @@ public class MockMiniServer {
             log.info("Shutdown signal received. Stopping server...");
             if (Objects.nonNull(app)) {
                 app.stop();
-                log.info("Javalin server stopped");
+                log.info("Server stopped");
             }
 
-            Database.close();
+            DatabaseManager.close();
             log.info("Graceful shutdown completed");
         }, "shutdown-hook"));
         log.info("Shutdown hook registered");

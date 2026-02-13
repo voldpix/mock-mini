@@ -1,23 +1,5 @@
 [
 {
-  "name":"[Lcom.zaxxer.hikari.util.ConcurrentBag$IConcurrentBagEntry;"
-},
-{
-  "name":"[Ljava.sql.Statement;"
-},
-{
-  "name":"com.zaxxer.hikari.HikariConfig",
-  "allDeclaredFields":true
-},
-{
-  "name":"com.zaxxer.hikari.pool.PoolBase",
-  "fields":[{"name":"catalog"}]
-},
-{
-  "name":"com.zaxxer.hikari.pool.PoolEntry",
-  "fields":[{"name":"state"}]
-},
-{
   "name":"dev.mock.mini.common.dto.IdResponse",
   "allDeclaredFields":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]
@@ -28,69 +10,12 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"java.lang.Boolean",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.Byte",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
   "name":"java.lang.Class",
   "methods":[{"name":"getRecordComponents","parameterTypes":[] }, {"name":"isRecord","parameterTypes":[] }]
 },
 {
-  "name":"java.lang.Double",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.Float",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.Integer",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.Long",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.Short",
-  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.System",
-  "methods":[{"name":"getSecurityManager","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.Thread",
-  "fields":[{"name":"threadLocalRandomProbe"}],
-  "methods":[{"name":"isVirtual","parameterTypes":[] }, {"name":"ofVirtual","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.Thread$Builder",
-  "methods":[{"name":"unstarted","parameterTypes":["java.lang.Runnable"] }]
-},
-{
-  "name":"java.lang.Thread$Builder$OfVirtual",
-  "methods":[{"name":"name","parameterTypes":["java.lang.String"] }]
-},
-{
-  "name":"java.lang.management.ManagementFactory",
-  "methods":[{"name":"getRuntimeMXBean","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.management.RuntimeMXBean",
-  "methods":[{"name":"getUptime","parameterTypes":[] }]
-},
-{
   "name":"java.lang.reflect.RecordComponent",
   "methods":[{"name":"getName","parameterTypes":[] }, {"name":"getType","parameterTypes":[] }]
-},
-{
-  "name":"java.security.AccessController",
-  "methods":[{"name":"doPrivileged","parameterTypes":["java.security.PrivilegedAction"] }]
 },
 {
   "name":"java.security.SecureRandomParameters"
@@ -99,20 +24,8 @@
   "name":"java.sql.Date"
 },
 {
-  "name":"java.sql.SQLException",
-  "fields":[{"name":"next"}]
-},
-{
-  "name":"java.util.HashMap",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"java.util.ImmutableCollections$ListN",
   "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"java.util.concurrent.Executors",
-  "methods":[{"name":"newThreadPerTaskExecutor","parameterTypes":["java.util.concurrent.ThreadFactory"] }, {"name":"newVirtualThreadPerTaskExecutor","parameterTypes":[] }]
 },
 {
   "name":"java.util.concurrent.ForkJoinTask",
@@ -127,42 +40,31 @@
   "fields":[{"name":"pair"}]
 },
 {
-  "name":"java.util.concurrent.atomic.AtomicReference",
-  "fields":[{"name":"value"}]
-},
-{
-  "name":"java.util.concurrent.atomic.Striped64",
-  "fields":[{"name":"base"}, {"name":"cellsBusy"}]
-},
-{
   "name":"jdk.internal.misc.Unsafe"
 },
 {
-  "name":"kotlin.SafePublicationLazyImpl",
-  "fields":[{"name":"_value"}]
+  "name":"net.jpountz.xxhash.StreamingXXHash32JNI$Factory",
+  "fields":[{"name":"INSTANCE"}]
 },
 {
-  "name":"kotlin.reflect.jvm.internal.ReflectionFactoryImpl"
+  "name":"net.jpountz.xxhash.StreamingXXHash64JNI$Factory",
+  "fields":[{"name":"INSTANCE"}]
 },
 {
-  "name":"org.eclipse.jetty.util.TypeUtil",
-  "methods":[{"name":"getClassLoaderLocation","parameterTypes":["java.lang.Class"] }, {"name":"getCodeSourceLocation","parameterTypes":["java.lang.Class"] }, {"name":"getModuleLocation","parameterTypes":["java.lang.Class"] }, {"name":"getSystemClassLoaderLocation","parameterTypes":["java.lang.Class"] }]
+  "name":"net.jpountz.xxhash.XXHash32JNI",
+  "fields":[{"name":"INSTANCE"}]
 },
 {
-  "name":"org.eclipse.jetty.websocket.server.JettyWebSocketServlet"
+  "name":"net.jpountz.xxhash.XXHash64JNI",
+  "fields":[{"name":"INSTANCE"}]
 },
 {
-  "name":"org.slf4j.Logger"
+  "name":"org.mapdb.Serializer",
+  "allDeclaredFields":true
 },
 {
-  "name":"org.slf4j.impl.StaticLoggerBinder"
-},
-{
-  "name":"org.slf4j.spi.SLF4JServiceProvider"
-},
-{
-  "name":"org.sqlite.JDBC",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
+  "name":"sun.reflect.ReflectionFactory",
+  "methods":[{"name":"getReflectionFactory","parameterTypes":[] }, {"name":"newConstructorForSerialization","parameterTypes":["java.lang.Class","java.lang.reflect.Constructor"] }]
 },
 {
   "name":"sun.security.provider.NativePRNG",
