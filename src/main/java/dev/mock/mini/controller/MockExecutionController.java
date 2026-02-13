@@ -1,9 +1,8 @@
 package dev.mock.mini.controller;
 
-import dev.mock.mini.common.util.StringUtil;
 import dev.mock.mini.service.MockExecutionService;
 import dev.mock.mini.service.MockRuleService;
-import dev.voldpix.loomera.context.RequestContext;
+import dev.voldpix.loomera.RequestContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,10 +17,10 @@ public class MockExecutionController {
     }
 
     public void execute(RequestContext ctx) {
-        var method = ctx.method();
-        var wildcardPath = ctx.wildcardPath();
+        var method = ctx.getMethod();
+        var wildcardPath = ctx.getWildcardPath();
         log.info("REQ: {}-{}", method, wildcardPath);
         var result = mockExecutionService.executeRule(method, wildcardPath);
-        ctx.status(200).json(result);
+        ctx.setStatus(200).json(result);
     }
 }

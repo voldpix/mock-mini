@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <loomera-local.version>0.0.1</loomera-local.version>
-        <loomera-git.version>5b6daf3d5f</loomera-git.version> <!-- commitID, first 10 -->
+        <loomera-git.version>b3dfcb3</loomera-git.version> <!-- commitID or tag -->
         <slf4j-simple.version>2.0.17</slf4j-simple.version>
         <gson.version>2.13.2</gson.version>
         <mapdb.version>3.1.0</mapdb.version>

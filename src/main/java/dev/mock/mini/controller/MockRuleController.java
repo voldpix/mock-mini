@@ -4,7 +4,7 @@ import dev.mock.mini.common.dto.MockRuleDto;
 import dev.mock.mini.common.exception.BadRequestException;
 import dev.mock.mini.common.validation.MockRuleValidator;
 import dev.mock.mini.service.MockRuleService;
-import dev.voldpix.loomera.context.RequestContext;
+import dev.voldpix.loomera.RequestContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,33 +24,33 @@ public class MockRuleController {
     }
 
     public void createMockRule(RequestContext ctx) {
-        var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);
+        var mockRuleDto = ctx.jsonBodyAsClass(MockRuleDto.class);
         mockRuleValidator.validateMockRule(mockRuleDto);
 
         var result = mockRuleService.createMockRule(mockRuleDto);
-        ctx.status(201).json(result);
+        ctx.setStatus(201).json(result);
     }
 
     public void updateMockRule(RequestContext ctx) {
-        var mockRuleId = ctx.param("id");
+        var mockRuleId = ctx.getQueryParam("id");
         if (mockRuleId.isBlank()) {
             throw new BadRequestException("Mock rule id is required");
         }
 
-        var mockRuleDto = ctx.bodyAsClass(MockRuleDto.class);
+        var mockRuleDto = ctx.jsonBodyAsClass(MockRuleDto.class);
         mockRuleValidator.validateMockRule(mockRuleDto);
 
         var result = mockRuleService.updateMockRule(mockRuleId, mockRuleDto);
-        ctx.status(200).json(result);
+        ctx.setStatus(200).json(result);
     }
 
     public void deleteMockRule(RequestContext ctx) {
-        var mockRuleId = ctx.param("id");
+        var mockRuleId = ctx.getQueryParam("id");
         if (mockRuleId.isBlank()) {
             throw new BadRequestException("id is null or blank");
         }
 
         mockRuleService.deleteMockRule(mockRuleId);
-        ctx.status(204);
+        ctx.setStatus(204);
     }
 }

@@ -1,18 +1,17 @@
 package dev.mock.mini;
 
 import com.google.gson.GsonBuilder;
+import dev.mock.mini.common.exception.BadRequestException;
 import dev.mock.mini.common.exception.MockMiniException;
 import dev.mock.mini.controller.MockExecutionController;
 import dev.mock.mini.controller.MockRuleController;
 import dev.mock.mini.repository.MockRuleRepository;
 import dev.mock.mini.service.MockExecutionService;
 import dev.mock.mini.service.MockRuleService;
+import dev.voldpix.loomera.JsonProvider;
 import dev.voldpix.loomera.Loomera;
-import dev.voldpix.loomera.json.JsonProvider;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.Objects;
 
 @Slf4j
@@ -38,11 +37,7 @@ public class MockMiniServer {
 
         var port = Constants.PORT;
         this.app.port(port);
-        try {
-            this.app.start();
-        } catch (IOException e) {
-            throw new MockMiniException("Exception starting Mock Mini", e);
-        }
+        this.app.start();
 
         log.info("Mock Mini Server started on port {}, version: {}", port, Constants.APP_VERSION);
         log.info("Dashboard UI: http://localhost:{}", port);
@@ -61,26 +56,43 @@ public class MockMiniServer {
 
     private void configureServer() {
         this.app = new Loomera();
-        this.app.jsonProvider(gsonMapper());
+        this.app.setJsonProvider(gsonMapper());
 
         setupRoutes();
+        setupExceptions();
     }
 
     private void setupRoutes() {
-        app.at("/health").get().handle(ctx -> ctx.result("OK"));
-        app.at("/rules").post().handle(ctx -> mockRuleController.createMockRule(ctx));
-        app.at("/rules/:id").put().handle(ctx -> mockRuleController.updateMockRule(ctx));
-        app.at("/rules/:id").delete().handle(ctx -> mockRuleController.deleteMockRule(ctx));
-        app.at("/rules").get().handle(ctx -> mockRuleController.getMockRules(ctx));
+        app.get("/health", ctx -> ctx.result("OK"));
+        app.post("/rules", ctx -> mockRuleController.createMockRule(ctx));
+        app.put("/rules", ctx -> mockRuleController.updateMockRule(ctx));
+        app.delete("/rules", ctx -> mockRuleController.deleteMockRule(ctx));
+        app.get("/rules", ctx -> mockRuleController.getMockRules(ctx));
 
         String[] paths = {"/m", "/m/*"};
         for (var path : paths) {
-            app.at(path).get().handle(ctx -> mockExecutionController.execute(ctx));
-            app.at(path).post().handle(ctx -> mockExecutionController.execute(ctx));
-            app.at(path).put().handle(ctx -> mockExecutionController.execute(ctx));
-            app.at(path).patch().handle(ctx -> mockExecutionController.execute(ctx));
-            app.at(path).delete().handle(ctx -> mockExecutionController.execute(ctx));
+            app.get(path, ctx -> mockExecutionController.execute(ctx));
+            app.post(path, ctx -> mockExecutionController.execute(ctx));
+            app.put(path, ctx -> mockExecutionController.execute(ctx));
+            app.patch(path, ctx -> mockExecutionController.execute(ctx));
+            app.delete(path, ctx -> mockExecutionController.execute(ctx));
         }
+    }
+
+    private void setupExceptions() {
+        record ErrorResponse(String error){}
+
+        app.exception(BadRequestException.class, (ctx, e) -> {
+            ctx.setStatus(400).json(new ErrorResponse(e.getMessage()));
+        });
+
+        app.exception(MockMiniException.class, (ctx, e) -> {
+            ctx.setStatus(500).json(new ErrorResponse(e.getMessage()));
+        });
+
+        app.exception(Exception.class, (ctx, e) -> {
+            ctx.setStatus(500).json(new ErrorResponse(e.getMessage()));
+        });
     }
 
     private JsonProvider gsonMapper() {
@@ -95,11 +107,6 @@ public class MockMiniServer {
             @Override
             public <T> T fromJson(String s, Class<T> aClass) {
                 return gson.fromJson(s, aClass);
-            }
-
-            @Override
-            public <T> T fromJson(String s, Type type) {
-                return gson.fromJson(s, type);
             }
         };
     }
